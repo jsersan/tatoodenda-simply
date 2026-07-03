@@ -1,0 +1,37 @@
+<!-- app.component.html - ARCHIVO COMPLETO -->
+
+<!-- Componente de encabezado que contiene el título de la tienda -->
+<app-header></app-header>
+
+<!-- Componente de barra de navegación con menús y opciones -->
+<app-navbar></app-navbar>
+
+<!-- Componente de banner rotativo que ahora aparece en todas las páginas -->
+<app-banner></app-banner>
+
+<!-- El enrutador de Angular que cargará dinámicamente los componentes según la URL -->
+<router-outlet></router-outlet>
+
+<!-- Componente de pie de página con información de contacto y enlaces -->
+<app-footer></app-footer>
+
+<!-- Componente de cart-popup para mostrar el carrito de compras -->
+<app-cart></app-cart>
+
+<!-- ✅ Login Popup - Se muestra cuando el guard lo requiere -->
+<app-login-popup 
+  [isVisible]="showLoginPopup"
+  [returnUrl]="loginReturnUrl" 
+  [fromCheckout]="loginFromCheckout"
+  (closePopup)="onLoginPopupClose()"
+  (loginSuccess)="onLoginSuccess($event)"
+  (switchToRegistro)="onSwitchToRegister()">
+</app-login-popup>
+
+<!-- ✅ Registro Popup -->
+<app-registro-popup 
+  [isVisible]="showRegistroPopup"
+  (closePopup)="onCloseRegistroPopup()"
+  (registroSuccess)="onRegistroSuccess()"
+  (switchToLogin)="onSwitchToLogin()">
+</app-registro-popup>

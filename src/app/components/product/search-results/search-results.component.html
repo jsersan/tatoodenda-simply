@@ -1,0 +1,48 @@
+<div class="search-results-container">
+  <!-- ✅ Título de resultados de búsqueda (estructura IDÉNTICA a product-list) -->
+  <div class="category-header">
+    <h1 id="titulo" *ngIf="!loading && products.length > 0">
+      resultados de la búsqueda para "{{ searchTerm }}"
+    </h1>
+    <h1 id="titulo" *ngIf="!loading && products.length === 0">
+      no se han encontrado productos
+    </h1>
+  </div>
+
+  <!-- Indicador de carga mientras se buscan productos -->
+  <div *ngIf="loading" class="loading-indicator">
+    <p>Buscando productos...</p>
+    <div class="spinner"></div>
+  </div>
+  
+  <!-- Mensaje cuando no hay resultados -->
+  <div *ngIf="!loading && products.length === 0" class="no-results">
+    <p>Intenta con otros términos de búsqueda como:</p>
+    <ul>
+      <li>anillo, banana, labret, barbell</li>
+      <li>plug, túnel, expander</li>
+      <li>piercing, dilatación</li>
+    </ul>
+  </div>
+  
+  <!-- ✅ CONTENEDOR DE RESULTADOS usando la misma estructura que product-list -->
+  <div id="articulos" *ngIf="!loading && products.length > 0">
+    <div class="articulo" 
+         *ngFor="let product of products" 
+         (click)="openProductPopup(product, $event)">
+      
+      <!-- ✅ Imagen del producto usando el servicio centralizado -->
+      <img [src]="productService.getProductImageSrc(product)" 
+           [alt]="product.nombre" 
+           (error)="handleImageError($event)" />
+      
+      <!-- ✅ Detalles del producto -->
+      <h2>{{ product.nombre }}</h2>
+      <h3>{{ formatPrice(product.precio) }}</h3>
+      <p class="description">{{ product.descripcion }}</p>
+    </div>
+  </div>
+</div>
+
+<!-- ✅ Incluir el componente popup de producto -->
+<app-product-popup></app-product-popup>

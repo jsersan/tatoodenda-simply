@@ -1,0 +1,73 @@
+<!-- cart.component.html -->
+<div class="cart-modal" [ngClass]="{'active': cartService.isCartOpen}">
+  <div class="cart-overlay" (click)="cerrarCarrito()"></div>
+  
+  <div class="cart-popup">
+    <div class="cart-header">
+      <h2>Tu Carrito</h2>
+      <button class="close-cart" (click)="cerrarCarrito()">×</button>
+    </div>
+
+    <div *ngIf="cartItems && cartItems.length > 0; else emptyCart" class="cart-content">
+      <div class="cart-table-container">
+        <table class="cart-table">
+          <thead>
+            <tr>
+              <th class="articulo-col">Artículo</th>
+              <th class="color-col">Color</th>
+              <th class="cantidad-col">Cantidad</th>
+              <th class="precio-col">Precio(u)</th>
+              <th class="precio-total-col">Precio (total)</th>
+              <th class="acciones-col"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of cartItems">
+              <td class="articulo-cell" data-label="Artículo">
+                <img [src]="getImageSrc(item)" [alt]="item.nombre" (error)="productService.handleImageError($event)" />
+                <span class="articulo-nombre">{{ item.nombre }}</span>
+              </td>
+              <td data-label="Color">{{ item.color }}</td>
+              <td class="cantidad-cell" data-label="Cantidad">
+                <div class="quantity-controls">
+                  <button class="qty-btn" (click)="decrementarCantidad(item)" [disabled]="item.cantidad <= 1">-</button>
+                  <span class="qty-value">{{ item.cantidad }}</span>
+                  <button class="qty-btn" (click)="incrementarCantidad(item)">+</button>
+                </div>
+              </td>
+              <!-- ✅ CORRECCIÓN: Euro después con espacio -->
+              <td class="precio-cell" data-label="Precio(u)">{{ item.precio | number:'1.2-2' }} €</td>
+              <!-- ✅ CORRECCIÓN: Euro después con espacio -->
+              <td class="precio-total-cell" data-label="Precio (total)">{{ (item.precio * item.cantidad) | number:'1.2-2' }} €</td>
+              <td class="acciones-cell">
+                <button class="remove-item" (click)="eliminarItem(item)">×</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <div class="cart-footer">
+        <div class="cart-total-row">
+          <span class="total-label">Total:</span>
+          <!-- ✅ CORRECCIÓN: Euro después con espacio -->
+          <span class="total-value">{{ total | number:'1.2-2' }} €</span>
+        </div>
+
+        <button class="procesar-compra-btn" (click)="procesarCompra()">
+          PROCESAR COMPRA
+        </button>
+      </div>
+    </div>
+
+    <ng-template #emptyCart>
+      <div class="empty-cart">
+        <h3>Tu carrito está vacío</h3>
+        <p>Añade algunos productos para continuar con la compra</p>
+        <button class="continue-shopping-btn" (click)="continuarComprando()">
+          Continuar comprando
+        </button>
+      </div>
+    </ng-template>
+  </div>
+</div>

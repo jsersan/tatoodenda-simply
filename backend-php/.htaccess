@@ -1,0 +1,25 @@
+# =============================================================================
+#  .htaccess del BACKEND PHP
+#  Enruta cualquier petición que no sea un fichero/directorio real a index.php,
+#  para que /productos, /categorias, /users/login, etc. lleguen al router
+#  aunque no exista mod_rewrite en la ruta. Funciona sea cual sea la subcarpeta.
+# =============================================================================
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Deja pasar ficheros y carpetas reales (por si sirves algo estático).
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # Todo lo demás -> index.php
+  RewriteRule ^ index.php [L]
+</IfModule>
+
+# Si Apache no propaga la cabecera Authorization (necesaria para el JWT),
+# esta línea la recupera para PHP.
+<IfModule mod_rewrite.c>
+  RewriteCond %{HTTP:Authorization} .
+  RewriteRule ^ - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+</IfModule>
