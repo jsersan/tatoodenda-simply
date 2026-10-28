@@ -7,11 +7,11 @@
 
 $config = [
     'db' => [
-        'host'    => 'localhost',
+        'host'    => 'qamn130.txemaserrano.com',
         'port'    => '8889',              // MAMP usa 8889; XAMPP/otros usan 3306
         'name'    => 'tatoodenda',
-        'user'    => 'root',
-        'pass'    => 'root',
+        'user'    => 'qamn130',
+        'pass'    => 'Jss12aoz',
         'charset' => 'utf8mb4',
     ],
 
@@ -21,6 +21,12 @@ $config = [
 
     // URL pública del frontend, para construir el enlace de recuperación.
     'app_url' => 'http://localhost:4200',
+
+    // Modo desarrollo. Si es true (o si 'smtp.host' está vacío), el endpoint
+    // /users/forgot-password devuelve el enlace de reset en la propia respuesta
+    // (campo devResetLink) para poder probar sin correo. En PRODUCCIÓN debe
+    // quedarse en false Y tener el SMTP configurado, o el enlace se expondría.
+    'dev_mode' => false,
 
     // Envío de email (SMTP autenticado). Rellena en config.local.php.
     // Deja 'host' vacío para DESACTIVAR el envío (los endpoints responderán

@@ -3,5 +3,8 @@
 // Los servicios le añaden /users, /categorias, /productos, /pedidos.
 export const environment = {
   production: true,
-  apiUrl: '/angular/ecommerce-backend/index.php'
+  apiUrl: '/angular/ecommerce-backend/index.php',
+  // Pega aquí tu OAuth Client ID de Google (termina en .apps.googleusercontent.com).
+  // Vacío = el botón de Google no se muestra.
+  googleClientId: ''
 };

@@ -270,6 +270,23 @@ $success-color: #2e7d32;
 }
 
 /* Enlace de registro - GRIS CORPORATIVO */
+.forgot-link {
+  text-align: center !important;
+  margin-top: 15px !important;
+
+  a {
+    color: #888 !important;
+    text-decoration: none !important;
+    font-size: 0.9em !important;
+    transition: all 0.2s ease !important;
+
+    &:hover {
+      color: $primary !important;
+      text-decoration: underline !important;
+    }
+  }
+}
+
 .register-link {
   text-align: center !important;
   margin-top: 25px !important;

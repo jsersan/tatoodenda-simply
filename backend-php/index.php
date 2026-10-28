@@ -115,19 +115,56 @@ try {
                 $email = trim((string) ($b['email'] ?? ''));
                 if ($email === '') Response::error(400, 'Falta el email');
 
+                // ¿Estamos en desarrollo? Se considera DEV si:
+                //   - dev_mode = true en la config, o
+                //   - no hay SMTP configurado (smtp.host vacío → típico en local).
+                // En DEV devolvemos el enlace en la propia respuesta para poder
+                // probar reset-password sin depender del correo. En PRODUCCIÓN
+                // (con SMTP configurado y dev_mode a false) esto NUNCA se activa.
+                $isDev = !empty($config['dev_mode']) || empty($config['smtp']['host']);
+
+                $devPayload = array();
+
                 $res = UsuarioRepo::createResetToken($email, 3600);
                 if ($res) {
                     $link = rtrim($config['app_url'], '/') . '/reset-password?token=' . $res['token'];
                     $nombre = $res['user']['nombre'] ?: $res['user']['username'];
-                    $html = '<p>Hola ' . htmlspecialchars($nombre) . ',</p>'
-                          . '<p>Has solicitado restablecer tu contraseña en TatooDenda. '
-                          . 'Pulsa el enlace (válido 1 hora):</p>'
-                          . '<p><a href="' . htmlspecialchars($link) . '">Restablecer contraseña</a></p>'
-                          . '<p>Si no has sido tú, ignora este mensaje.</p>';
-                    Mailer::send($config, $email, $nombre, 'Recuperar contraseña · TatooDenda', $html);
+
+                    // Registrar SIEMPRE el enlace en el log de PHP (útil para depurar
+                    // aunque el correo no salga). En MAMP suele estar en
+                    // /Applications/MAMP/logs/php_error.log
+                    error_log('[TatooDenda] Enlace de recuperacion para ' . $email . ': ' . $link);
+
+                    // Envío de email BLINDADO: un fallo de correo (SMTP caído,
+                    // timeout, no configurado...) no debe tumbar la petición.
+                    try {
+                        $html = '<p>Hola ' . htmlspecialchars($nombre) . ',</p>'
+                              . '<p>Has solicitado restablecer tu contraseña en TatooDenda. '
+                              . 'Pulsa el enlace (válido 1 hora):</p>'
+                              . '<p><a href="' . htmlspecialchars($link) . '">Restablecer contraseña</a></p>'
+                              . '<p>Si no has sido tú, ignora este mensaje.</p>';
+                        $mail = Mailer::send($config, $email, $nombre, 'Recuperar contraseña · TatooDenda', $html);
+                        if (empty($mail['sent'])) {
+                            error_log('[TatooDenda] Email de recuperacion NO enviado: '
+                                . ($mail['error'] ?? 'motivo desconocido'));
+                        }
+                    } catch (Throwable $e) {
+                        error_log('[TatooDenda] Excepcion al enviar email de recuperacion: ' . $e->getMessage());
+                    }
+
+                    if ($isDev) {
+                        $devPayload = array(
+                            'devResetLink' => $link,
+                            'devToken'     => $res['token'],
+                        );
+                    }
                 }
-                // Respuesta genérica (no revela si el email existe).
-                Response::json(array('message' => 'Si el email existe, recibirás un enlace de recuperación.'));
+
+                // Respuesta genérica (no revela si el email existe) + extras de DEV.
+                Response::json(array_merge(
+                    array('message' => 'Si el email existe, recibirás un enlace de recuperación.'),
+                    $devPayload
+                ));
             }
 
             if ($method === 'GET' && $sub === 'verify-reset-token') {

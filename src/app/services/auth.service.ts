@@ -143,6 +143,47 @@ export class AuthService {
     return isAuthenticated;
   }
 
+  // ===========================================================================
+  //  RECUPERACIÓN DE CONTRASEÑA
+  //  Estos métodos NO pasan por handleError a propósito: los componentes
+  //  forgot-password / reset-password leen res.message y err.error.message
+  //  directamente, así que dejamos propagar la respuesta HTTP original.
+  // ===========================================================================
+
+  /**
+   * Solicita un enlace de recuperación para el email dado.
+   * El backend responde SIEMPRE el mismo mensaje, exista o no el email
+   * (para no revelar qué correos están registrados).
+   * POST /users/forgot-password  body: { email }
+   */
+  forgotPassword(email: string): Observable<any> {
+    console.log('📧 Solicitando recuperación de contraseña para:', email);
+    return this.http.post<any>(`${this.apiUrl}/forgot-password`, { email });
+  }
+
+  /**
+   * Comprueba si un token de recuperación es válido y no ha caducado.
+   * GET /users/verify-reset-token/{token}  →  { valid: boolean, message }
+   */
+  verifyResetToken(token: string): Observable<any> {
+    console.log('🔎 Verificando token de recuperación');
+    return this.http.get<any>(
+      `${this.apiUrl}/verify-reset-token/${encodeURIComponent(token)}`
+    );
+  }
+
+  /**
+   * Establece una nueva contraseña usando un token válido.
+   * POST /users/reset-password  body: { token, newPassword }
+   */
+  resetPassword(token: string, newPassword: string): Observable<any> {
+    console.log('🔐 Restableciendo contraseña con token');
+    return this.http.post<any>(`${this.apiUrl}/reset-password`, {
+      token,
+      newPassword
+    });
+  }
+
   // Método mejorado para manejo de errores
   private handleError(operation = 'operation') {
     return (error: HttpErrorResponse): Observable<never> => {

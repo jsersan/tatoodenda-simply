@@ -37,6 +37,10 @@ import { RegistroPopupComponent } from './components/registro-popup/registro-pop
 import { HistorialPedidosComponent } from './components/historial-pedidos/historial-pedidos.component';
 import { PasswordConfirmModalComponent } from './components/password-confirm-modal/password-confirm-modal';
 
+// ✅ Recuperación de contraseña
+import { ForgotPasswordComponent } from './components/forgot-password/forgot-password.component';
+import { ResetPasswordComponent } from './components/reset-password/reset-password.component';
+
 // Servicios
 import { PdfService } from './services/pdf.service';
 
@@ -64,7 +68,10 @@ import { PdfService } from './services/pdf.service';
     LoginPopupComponent,
     RegistroPopupComponent,
     HistorialPedidosComponent,
-    PasswordConfirmModalComponent
+    PasswordConfirmModalComponent,
+    // ✅ Recuperación de contraseña
+    ForgotPasswordComponent,
+    ResetPasswordComponent
   ],
   imports: [
     BrowserModule,

@@ -65,6 +65,48 @@ class UsuarioRepo
         return self::get((int) DB::pdo()->lastInsertId());
     }
 
+    /**
+     * Inicia sesión con Google: si el email ya existe, devuelve ese usuario;
+     * si no, crea uno nuevo (sin contraseña utilizable) y lo devuelve.
+     * $google = ['email'=>..., 'name'=>...]
+     */
+    public static function loginOrCreateGoogle($google)
+    {
+        $email = trim((string) ($google['email'] ?? ''));
+        $name  = trim((string) ($google['name'] ?? $email));
+        if ($email === '') return null;
+
+        // ¿Ya existe por email?
+        $stmt = DB::pdo()->prepare("SELECT * FROM user WHERE email = ? LIMIT 1");
+        $stmt->execute(array($email));
+        $row = $stmt->fetch();
+        if ($row) return self::hydrate($row);
+
+        // Crear usuario nuevo. username a partir del email, garantizando unicidad.
+        $base = preg_replace('/[^a-zA-Z0-9_.-]/', '', explode('@', $email)[0]);
+        if ($base === '') $base = 'user';
+        $username = $base;
+        $i = 0;
+        $check = DB::pdo()->prepare("SELECT id FROM user WHERE username = ? LIMIT 1");
+        while (true) {
+            $check->execute(array($username));
+            if (!$check->fetch()) break;
+            $i++;
+            $username = $base . $i;
+        }
+
+        // Contraseña aleatoria no utilizable (el acceso es solo por Google).
+        $randomHash = password_hash(bin2hex(random_bytes(16)), PASSWORD_BCRYPT);
+
+        $ins = DB::pdo()->prepare(
+            "INSERT INTO user (username, password, nombre, email, direccion, ciudad, cp, role)
+             VALUES (?, ?, ?, ?, '', '', '', 'user')"
+        );
+        $ins->execute(array($username, $randomHash, $name, $email));
+
+        return self::get((int) DB::pdo()->lastInsertId());
+    }
+
     /** Comprueba credenciales. Devuelve el usuario público o null. */
     public static function login($username, $password)
     {

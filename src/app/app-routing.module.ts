@@ -14,6 +14,8 @@ import { ProductListComponent } from './components/product/product-list/product-
 import { ProductDetailComponent } from './components/product/product-detail/product-detail.component';
 import { SearchResultsComponent } from './components/product/search-results/search-results.component';
 import { HistorialPedidosComponent } from './components/historial-pedidos/historial-pedidos.component';
+import { ForgotPasswordComponent } from './components/forgot-password/forgot-password.component';
+import { ResetPasswordComponent } from './components/reset-password/reset-password.component';
 
 const routes: Routes = [
   // ================================
@@ -87,6 +89,26 @@ const routes: Routes = [
       data: { title: 'Historial de Pedidos - TatooDenda' } 
     },
   
+
+  // ================================
+  // 🔑 RECUPERACIÓN DE CONTRASEÑA (públicas)
+  // ================================
+
+  // Formulario para solicitar el enlace de recuperación
+  {
+    path: 'forgot-password',
+    component: ForgotPasswordComponent,
+    data: { title: 'Recuperar contraseña - TatooDenda' }
+  },
+  { path: 'recuperar-contrasena', redirectTo: 'forgot-password', pathMatch: 'full' },
+
+  // Página a la que apunta el enlace del email (?token=...)
+  {
+    path: 'reset-password',
+    component: ResetPasswordComponent,
+    data: { title: 'Restablecer contraseña - TatooDenda' }
+  },
+  { path: 'restablecer-contrasena', redirectTo: 'reset-password', pathMatch: 'full' },
 
   // ================================
   // 🔒 RUTAS PROTEGIDAS (requieren autenticación)

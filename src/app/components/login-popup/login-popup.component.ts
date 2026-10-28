@@ -99,6 +99,12 @@ export class LoginPopupComponent implements OnInit {
     this.resetForm();
   }
 
+  // Método para navegar a la recuperación de contraseña
+  irARecuperar(): void {
+    this.cerrarPopup();                        // cierra el popup y restaura el scroll
+    this.router.navigate(['/forgot-password']);
+  }
+
   // Método para resetear el formulario
   private resetForm(): void {
     this.usuario = '';
