@@ -1,17 +1,18 @@
 <?php
 // =============================================================================
 //  CONFIG.PHP  ·  Configuración base (valores de DESARROLLO / MAMP)
-//  - Los valores reales de producción (Arsys) se ponen en config.local.php,
-//    que NO se sube a Git (está en .gitignore) y sobreescribe lo de aquí.
+//  - Este fichero SÍ se sube a Git: aquí solo van valores locales sin secretos.
+//  - Los valores reales de producción (Arsys) van en config.local.php, que
+//    NO se sube a Git (está en .gitignore) y sobreescribe lo de aquí.
 // =============================================================================
 
 $config = [
     'db' => [
-        'host'    => 'qamn130.txemaserrano.com',
-        'port'    => '8889',              // MAMP usa 8889; XAMPP/otros usan 3306
-        'name'    => 'tatoodenda',
-        'user'    => 'qamn130',
-        'pass'    => 'Jss12aoz',
+        'host'    => 'qamn130.txemaserrano.com',           // MySQL de MAMP (127.0.0.1 evita el socket)
+        'port'    => '8889',                // MAMP usa 8889; XAMPP/otros usan 3306
+        'name'    => 'qamn130',          // creada por backend-php/sql/tatoodenda.sql
+        'user'    => 'qamn130',                // usuario por defecto de MAMP
+        'pass'    => 'Jss12apozMafmk2556#',                // contraseña por defecto de MAMP
         'charset' => 'utf8mb4',
     ],
 
