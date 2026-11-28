@@ -16,6 +16,8 @@ $config = [
         'charset' => 'utf8mb4',
     ],
 
+    'google_client_id' => '258914466032-s0c4khhlnsj5uub7qijir9vig2t5rgbd.apps.googleusercontent.com',
+
     // Clave para firmar los JWT. En producción, cámbiala en config.local.php.
     'jwt_secret' => 'CAMBIA-ESTA-CLAVE-EN-config.local.php',
     'jwt_ttl'    => 60 * 60 * 24,          // 24 horas (en segundos)

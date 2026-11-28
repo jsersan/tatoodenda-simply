@@ -47,6 +47,7 @@ require __DIR__ . '/productos.php';
 require __DIR__ . '/pedidos.php';
 require __DIR__ . '/mailer.php';
 require __DIR__ . '/albaran.php';
+require __DIR__ . '/google.php';
 
 DB::init($config);
 $secret = $config['jwt_secret'];
@@ -101,6 +102,21 @@ try {
                 if (!$u) Response::error(401, 'Credenciales inválidas');
                 $token = Jwt::encode(array('id' => $u['id'], 'role' => $u['role']), $secret, $ttl);
                 Response::json(array_merge($u, array('token' => $token, 'message' => 'Login exitoso')));
+            }
+
+            if ($method === 'POST' && $sub === 'google') {
+                $b = body_json();
+                $google = verify_google_token(
+                    (string) ($b['credential'] ?? ''),
+                    (string) ($config['google_client_id'] ?? '')
+                );
+                if (!$google) Response::error(401, 'No se pudo verificar la cuenta de Google');
+            
+                $u = UsuarioRepo::loginOrCreateGoogle($google);
+                if (!$u) Response::error(400, 'No se pudo iniciar sesión con esa cuenta de Google');
+            
+                $token = Jwt::encode(array('id' => $u['id'], 'role' => $u['role']), $secret, $ttl);
+                Response::json(array_merge($u, array('token' => $token, 'message' => 'Login con Google exitoso')));
             }
 
             if ($method === 'GET' && $sub === 'profile') {

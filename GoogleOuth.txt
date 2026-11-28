@@ -1,0 +1,3 @@
+ID de cliente: 258914466032-s0c4khhlnsj5uub7qijir9vig2t5rgbd.apps.googleusercontent.com
+Secreto del cliente: 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
+Estado: habilitada

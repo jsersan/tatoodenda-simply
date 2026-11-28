@@ -48,7 +48,7 @@ function verify_google_token($idToken, $clientId)
     if (!is_array($info) || empty($info['email'])) return null;
 
     // El token debe ser para NUESTRA app.
-    if ($clientId !== '' && ($info['aud'] ?? '') !== $clientId) return null;
+    if ($clientId === '' || ($info['aud'] ?? '') !== $clientId) return null;
 
     // Emisor correcto.
     $iss = $info['iss'] ?? '';

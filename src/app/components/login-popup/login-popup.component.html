@@ -67,6 +67,12 @@
         </button>
       </form>
       
+      <!-- Acceso con Google -->
+      <div class="login-divider" *ngIf="googleEnabled"><span>o</span></div>
+      <div class="google-btn-wrapper" *ngIf="googleEnabled" [class.disabled]="isLoading">
+        <div #googleBtn></div>
+      </div>
+
       <!-- Enlace de recuperación de contraseña -->
       <div class="forgot-link">
         <a href="#" (click)="irARecuperar(); $event.preventDefault()">¿Has olvidado tu contraseña?</a>

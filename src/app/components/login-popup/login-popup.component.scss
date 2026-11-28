@@ -269,6 +269,41 @@ $success-color: #2e7d32;
   100% { transform: rotate(360deg); }
 }
 
+/* Acceso con Google */
+.login-divider {
+  display: flex !important;
+  align-items: center !important;
+  margin: 22px 0 16px !important;
+  color: #999 !important;
+  font-size: 0.85em !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1px !important;
+
+  &::before,
+  &::after {
+    content: '' !important;
+    flex: 1 !important;
+    height: 1px !important;
+    background: #eee !important;
+  }
+
+  span {
+    padding: 0 12px !important;
+  }
+}
+
+.google-btn-wrapper {
+  display: flex !important;
+  justify-content: center !important;
+  min-height: 44px !important;
+  transition: opacity 0.2s ease !important;
+
+  &.disabled {
+    opacity: 0.5 !important;
+    pointer-events: none !important;
+  }
+}
+
 /* Enlace de registro - GRIS CORPORATIVO */
 .forgot-link {
   text-align: center !important;

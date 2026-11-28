@@ -59,6 +59,29 @@ export class AuthService {
       );
   }
 
+  /**
+   * Login con Google (Google Identity Services).
+   * Recibe el ID token ("credential") y el backend lo verifica con Google.
+   * POST /users/google  body: { credential }  →  usuario + token (igual que /login)
+   */
+  loginWithGoogle(credential: string): Observable<User> {
+    return this.http.post<User>(`${this.apiUrl}/google`, { credential })
+      .pipe(
+        map(user => {
+          localStorage.setItem('currentUser', JSON.stringify(user));
+          this.currentUserSubject.next(user);
+          return user;
+        }),
+        catchError((error: HttpErrorResponse) => {
+          console.error('❌ Error en login con Google:', error);
+          const message = error.status === 0
+            ? 'No se puede conectar al servidor'
+            : (error.error?.message || 'No se pudo iniciar sesión con Google');
+          return throwError(() => new Error(message));
+        })
+      );
+  }
+
   register(user: any): Observable<User> {
     console.log('🚀 Intentando registro de usuario:', user.username);
     console.log('📡 URL de registro:', `${this.apiUrl}/register`);

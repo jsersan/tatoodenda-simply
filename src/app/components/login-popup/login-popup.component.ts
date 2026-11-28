@@ -1,7 +1,11 @@
 // login-popup.component.ts - VERSIÓN CORREGIDA
-import { Component, OnInit, Output, EventEmitter, Input, ViewEncapsulation } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, NgZone, OnInit, Output, ViewChild, ViewEncapsulation } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { environment } from '../../../environments/environment';
+
+// Librería de Google Identity Services (se carga dinámicamente)
+declare const google: any;
 
 @Component({
   selector: 'app-login-popup',
@@ -23,9 +27,23 @@ export class LoginPopupComponent implements OnInit {
   isLoading: boolean = false;
   errorMessage: string = '';
 
+  // --- Acceso con Google ---
+  // Si googleClientId está vacío en environment, el botón no se muestra.
+  readonly googleEnabled: boolean = !!environment.googleClientId;
+  private googleInitialized = false;
+
+  // Se ejecuta cada vez que el popup se abre y aparece el contenedor del botón.
+  @ViewChild('googleBtn')
+  set googleBtn(ref: ElementRef<HTMLElement> | undefined) {
+    if (ref && this.googleEnabled) {
+      this.renderGoogleButton(ref.nativeElement);
+    }
+  }
+
   constructor(
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private ngZone: NgZone
   ) { }
 
   ngOnInit(): void {
@@ -89,6 +107,81 @@ export class LoginPopupComponent implements OnInit {
         this.isLoading = false;
         this.errorMessage = error.message || 'Usuario o contraseña incorrectos';
         console.error('❌ Error en login:', error);
+      }
+    });
+  }
+
+  // ---------- Acceso con Google (Google Identity Services) ----------
+
+  private loadGoogleScript(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (typeof google !== 'undefined' && google?.accounts?.id) {
+        resolve();
+        return;
+      }
+      const existing = document.getElementById('google-gsi-script');
+      if (existing) {
+        existing.addEventListener('load', () => resolve());
+        existing.addEventListener('error', () => reject(new Error('No se pudo cargar Google')));
+        return;
+      }
+      const script = document.createElement('script');
+      script.id = 'google-gsi-script';
+      script.src = 'https://accounts.google.com/gsi/client';
+      script.async = true;
+      script.defer = true;
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error('No se pudo cargar Google'));
+      document.head.appendChild(script);
+    });
+  }
+
+  private async renderGoogleButton(host: HTMLElement): Promise<void> {
+    try {
+      await this.loadGoogleScript();
+
+      if (!this.googleInitialized) {
+        google.accounts.id.initialize({
+          client_id: environment.googleClientId,
+          callback: (resp: any) =>
+            this.ngZone.run(() => this.onGoogleCredential(resp?.credential))
+        });
+        this.googleInitialized = true;
+      }
+
+      host.innerHTML = '';
+      google.accounts.id.renderButton(host, {
+        type: 'standard',
+        theme: 'outline',
+        size: 'large',
+        text: 'continue_with',
+        shape: 'rectangular',
+        locale: 'es',
+        width: Math.min(400, host.clientWidth || 360)
+      });
+    } catch (e) {
+      console.error('⚠️ No se pudo mostrar el botón de Google:', e);
+    }
+  }
+
+  // Google devuelve un ID token ("credential"): lo verifica el backend.
+  private onGoogleCredential(credential: string | undefined): void {
+    if (!credential) {
+      return;
+    }
+
+    this.isLoading = true;
+    this.errorMessage = '';
+
+    this.authService.loginWithGoogle(credential).subscribe({
+      next: (response) => {
+        this.isLoading = false;
+        this.loginSuccess.emit(response);
+        this.cerrarPopup();
+      },
+      error: (error) => {
+        this.isLoading = false;
+        this.errorMessage = error.message || 'No se pudo iniciar sesión con Google';
       }
     });
   }

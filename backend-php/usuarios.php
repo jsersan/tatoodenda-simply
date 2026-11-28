@@ -65,16 +65,25 @@ class UsuarioRepo
         return self::get((int) DB::pdo()->lastInsertId());
     }
 
+    /** Deja solo caracteres que admite una columna latin1 (el resto pasa a '?'). */
+    private static function latin1Safe($s)
+    {
+        if (function_exists('mb_convert_encoding')) {
+            return mb_convert_encoding(mb_convert_encoding($s, 'ISO-8859-1', 'UTF-8'), 'UTF-8', 'ISO-8859-1');
+        }
+        return preg_replace('/[^\x20-\x7E]/', '', $s);
+    }
+
     /**
      * Inicia sesión con Google: si el email ya existe, devuelve ese usuario;
      * si no, crea uno nuevo (sin contraseña utilizable) y lo devuelve.
-     * $google = ['email'=>..., 'name'=>...]
+     * $google = ['email'=>..., 'name'=>...]  (ya verificado por GoogleAuth)
+     * Respeta los límites de la tabla `user`: username 20, nombre 50, email 50.
      */
     public static function loginOrCreateGoogle($google)
     {
         $email = trim((string) ($google['email'] ?? ''));
-        $name  = trim((string) ($google['name'] ?? $email));
-        if ($email === '') return null;
+        if ($email === '' || strlen($email) > 50) return null;
 
         // ¿Ya existe por email?
         $stmt = DB::pdo()->prepare("SELECT * FROM user WHERE email = ? LIMIT 1");
@@ -82,9 +91,10 @@ class UsuarioRepo
         $row = $stmt->fetch();
         if ($row) return self::hydrate($row);
 
-        // Crear usuario nuevo. username a partir del email, garantizando unicidad.
+        // Crear usuario nuevo. username a partir del email (máx. 20), único.
         $base = preg_replace('/[^a-zA-Z0-9_.-]/', '', explode('@', $email)[0]);
         if ($base === '') $base = 'user';
+        $base = substr($base, 0, 15);          // deja sitio para un sufijo numérico
         $username = $base;
         $i = 0;
         $check = DB::pdo()->prepare("SELECT id FROM user WHERE username = ? LIMIT 1");
@@ -94,6 +104,11 @@ class UsuarioRepo
             $i++;
             $username = $base . $i;
         }
+
+        // Nombre: máx. 50 y solo caracteres que admite la columna (latin1).
+        $name = self::latin1Safe(trim((string) ($google['name'] ?? '')));
+        $name = function_exists('mb_substr') ? mb_substr($name, 0, 50) : substr($name, 0, 50);
+        if ($name === '') $name = $username;
 
         // Contraseña aleatoria no utilizable (el acceso es solo por Google).
         $randomHash = password_hash(bin2hex(random_bytes(16)), PASSWORD_BCRYPT);
